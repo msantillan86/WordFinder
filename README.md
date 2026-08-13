@@ -27,15 +27,18 @@ Benchmarks were executed scientifically using **BenchmarkDotNet** in a controlle
 - **Input stream:** a large stream of **10,000 words** with a high duplication rate.
 
 Environment summary (example):
-- BenchmarkDotNet v0.15.8
-- Runtime: .NET 10.0.11
-- OS: Windows 10
+- BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
+- Intel Core i5-7200U CPU 2.50GHz (Max: 2.70GHz) (Kaby Lake), 1 CPU, 4 logical and 2 physical cores
+- .NET SDK 10.0.400
+  [Host]     : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  DefaultJob : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
 
-Example results:
 
-| Method              | Mean     | Error   | StdDev  | Gen0    | Gen1    | Gen2    | Allocated |
-|-------------------- |---------:|--------:|--------:|--------:|--------:|--------:|----------:|
-| TestFindPerformance | 301.2 us | 5.86 us | 6.51 us | 49.8047 | 49.8047 | 49.8047 | 198.86 KB |
+| Method              | WordStreamSize | Mean        | Error     | StdDev    | Rank | Gen0    | Gen1    | Gen2    | Allocated |
+|-------------------- |--------------- |------------:|----------:|----------:|-----:|--------:|--------:|--------:|----------:|
+| TestFindPerformance | 100            |    189.9 us |   3.72 us |   4.84 us |    1 |  2.6855 |       - |       - |   4.41 KB |
+| TestFindPerformance | 1000           |  1,983.6 us |  51.54 us | 147.88 us |    2 | 13.6719 |       - |       - |  23.38 KB |
+| TestFindPerformance | 10000          | 18,859.3 us | 375.48 us | 892.36 us |    3 | 31.2500 | 31.2500 | 31.2500 |  200.9 KB |
 
 ---
 

@@ -6,21 +6,20 @@ namespace WordFinder.Benchmarks
     {
         static void Main(string[] args)
         {
-            // --- TEXTO TEMPORAL PARA VER EL RESULTADO ---
+            // --- TEMPORARY OUTPUT TO INSPECT RESULTS ---
             var test = new WordFinderBenchmark();
             test.Setup();
-
-            Console.WriteLine("--- TOP 10 PALABRAS ENCONTRADAS ---");
-            // Forzamos la ejecución para ver qué devuelve
-            var resultadoVisible = test.TestFindPerformance();
-            foreach (var palabra in resultadoVisible)
+            Console.WriteLine("--- TOP 10 WORDS FOUND ---");
+            // Force execution to inspect the result
+            var visibleResult = test.TestFindPerformance();
+            foreach (var word in visibleResult)
             {
-                Console.WriteLine(palabra);
+                Console.WriteLine(word);
             }
             Console.WriteLine("-----------------------------------\n");
             // --------------------------------------------
 
-            // Luego de ver que está bien, dejas correr el Benchmark formal
+            // After verifying the output above, run the formal benchmark
             BenchmarkRunner.Run<WordFinderBenchmark>();
         }
     }

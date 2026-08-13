@@ -15,12 +15,8 @@
                 return;
             }
 
-            // 1. Procesamos y validamos el stream horizontal en un solo paso
             _horizontalLines = ProcessAndValidateMatrix(matrix, out int colCount);
-
             _maxWordLength = Math.Max(_horizontalLines.Length, colCount);
-
-            // 2. Transponemos las columnas al Stack de forma segura
             _verticalLines = TransposeColumns(_horizontalLines, colCount);
         }
 
@@ -29,7 +25,17 @@
             if (wordstream == null || _horizontalLines.Length == 0)
                 return [];
 
-            // Eliminamos duplicados en O(1)
+            var wordCounts = CountWordOccurrences(wordstream);
+
+            return wordCounts
+                .OrderByDescending(kvp => kvp.Value)
+                .Select(kvp => kvp.Key)
+                .Take(10);
+        }
+
+        #region Helper Methods
+        private Dictionary<string, int> CountWordOccurrences(IEnumerable<string> wordstream)
+        {
             var uniqueWords = new HashSet<string>(wordstream, StringComparer.OrdinalIgnoreCase);
             var wordCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
@@ -38,54 +44,51 @@
                 if (string.IsNullOrEmpty(word) || word.Length > _maxWordLength) continue;
 
                 int occurrences = 0;
+                ReadOnlySpan<char> wordSpan = word.AsSpan();
 
                 for (int i = 0; i < _horizontalLines.Length; i++)
-                {
-                    occurrences += CountSubstrings(_horizontalLines[i], word);
-                }
+                    occurrences += CountSubstrings(_horizontalLines[i].AsSpan(), wordSpan);
 
                 for (int i = 0; i < _verticalLines.Length; i++)
-                {
-                    occurrences += CountSubstrings(_verticalLines[i], word);
-                }
+                    occurrences += CountSubstrings(_verticalLines[i].AsSpan(), wordSpan);
 
                 if (occurrences > 0)
                     wordCounts[word] = occurrences;
             }
 
-            return wordCounts
-                .OrderByDescending(kvp => kvp.Value)
-                .Select(kvp => kvp.Key)
-                .Take(10);
+            return wordCounts;
         }
-
-        #region Helper Methods Privados
 
         private static string[] ProcessAndValidateMatrix(IEnumerable<string> matrix, out int colCount)
         {
-            int estimatedRows = matrix is ICollection<string> col ? col.Count : MaxMatrixSize + 1;
-            if (estimatedRows > MaxMatrixSize && matrix is ICollection<string>)
+            if (matrix is ICollection<string> col && col.Count > MaxMatrixSize)
+            {
                 throw new ArgumentException($"Matrix dimensions must not exceed {MaxMatrixSize}x{MaxMatrixSize}.");
+            }
+            var tempHorizontal = new string[MaxMatrixSize];
 
-            var tempHorizontal = new string[Math.Min(estimatedRows, MaxMatrixSize + 1)];
             int rowCount = 0;
             colCount = -1;
 
             foreach (string row in matrix)
             {
                 if (rowCount >= MaxMatrixSize)
-                    throw new ArgumentException($"Las dimensiones de la matriz no pueden superar {MaxMatrixSize}x{MaxMatrixSize}.");
+                {
+                    throw new ArgumentException($"Matrix dimensions must not exceed {MaxMatrixSize}x{MaxMatrixSize}.");
+                }
 
                 if (row == null)
-                    throw new ArgumentException("La matriz no puede contener filas nulas.");
+                {
+                    throw new ArgumentException("The matrix cannot contain null rows.");
+                }
 
                 if (colCount == -1)
                 {
                     colCount = row.Length;
                     if (colCount > MaxMatrixSize)
+                    {
                         throw new ArgumentException($"Matrix dimensions must not exceed {MaxMatrixSize}x{MaxMatrixSize}.");
-
-                    if (tempHorizontal.Length > MaxMatrixSize) tempHorizontal = new string[MaxMatrixSize];
+                    }
                 }
                 else if (row.Length != colCount)
                 {
@@ -118,20 +121,20 @@
             return verticalLines;
         }
 
-        private static int CountSubstrings(string source, string value)
+        private static int CountSubstrings(ReadOnlySpan<char> source, ReadOnlySpan<char> value)
         {
             int count = 0;
-            int index = 0;
 
-            while ((index = source.IndexOf(value, index, StringComparison.OrdinalIgnoreCase)) != -1)
+            while (true)
             {
-                count++;
-                index++;
-            }
+                int index = source.IndexOf(value, StringComparison.OrdinalIgnoreCase);
+                if (index == -1) break;
 
+                count++;
+                source = source.Slice(index + 1);
+            }
             return count;
         }
-
         #endregion
     }
 }

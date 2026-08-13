@@ -18,7 +18,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Matrix (one row per line)</label>
                     <textarea class="form-control font-monospace" rows="10" @bind="MatrixText"></textarea>
-                    <small class="form-text text-muted">Cada fila debe tener la misma longitud. Máx 64x64.</small>
+                    <small class="form-text text-muted">Each row must have the same length. Max 64x64.</small>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -34,7 +34,7 @@
             <h5>Results</h5>
             @if (IsSearching)
             {
-                <div class="text-muted">Buscando...</div>
+                <div class="text-muted">Searching...</div>
             }
             else if (Results != null && Results.Any())
             {
@@ -108,7 +108,7 @@
                 .Select(w => w.Trim())
                 .Where(w => !string.IsNullOrEmpty(w));
 
-            // Construcción de WordFinder puede lanzar ArgumentException si la matriz es inválida
+            // Constructing WordFinder can throw ArgumentException if the matrix is invalid
             WordFinder finder = new WordFinder(matrixRows);
 
             var found = finder.Find(words);
@@ -121,8 +121,8 @@
         }
         catch (Exception ex)
         {
-            // Errores inesperados: no romper la UI
-            ErrorMessage = "Se produjo un error inesperado: " + ex.Message;
+            // Unexpected errors: don't break the UI
+            ErrorMessage = "An unexpected error occurred: " + ex.Message;
             Results = null;
         }
         finally
