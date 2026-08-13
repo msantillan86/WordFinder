@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/WordFinder.Benchmarks/BenchmarkDotNet.Artifacts/WordFinder.Benchmarks.WordFinderBenchmark-20260813-131800.log
