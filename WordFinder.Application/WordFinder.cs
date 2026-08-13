@@ -65,7 +65,7 @@
         {
             int estimatedRows = matrix is ICollection<string> col ? col.Count : MaxMatrixSize + 1;
             if (estimatedRows > MaxMatrixSize && matrix is ICollection<string>)
-                throw new ArgumentException($"Las dimensiones de la matriz no pueden superar {MaxMatrixSize}x{MaxMatrixSize}.");
+                throw new ArgumentException($"Matrix dimensions must not exceed {MaxMatrixSize}x{MaxMatrixSize}.");
 
             var tempHorizontal = new string[Math.Min(estimatedRows, MaxMatrixSize + 1)];
             int rowCount = 0;
@@ -83,13 +83,13 @@
                 {
                     colCount = row.Length;
                     if (colCount > MaxMatrixSize)
-                        throw new ArgumentException($"Las dimensiones de la matriz no pueden superar {MaxMatrixSize}x{MaxMatrixSize}.");
+                        throw new ArgumentException($"Matrix dimensions must not exceed {MaxMatrixSize}x{MaxMatrixSize}.");
 
                     if (tempHorizontal.Length > MaxMatrixSize) tempHorizontal = new string[MaxMatrixSize];
                 }
                 else if (row.Length != colCount)
                 {
-                    throw new ArgumentException("Todas las filas de la matriz deben tener la misma longitud.");
+                    throw new ArgumentException("All rows in the matrix must have the same length.");
                 }
 
                 tempHorizontal[rowCount++] = row;

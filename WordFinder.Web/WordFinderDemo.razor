@@ -1,0 +1,134 @@
+@page "/wordfinderdemo"
+@using WordFinder.Application
+
+<div class="container my-4">
+    <div class="card shadow-sm">
+    <div class="card-body">
+            <h3 class="card-title">Word Finder — Interactive Demo</h3>
+            <p class="text-muted">Paste a matrix (one row per line) and a list of words to search. Click "Search Words".</p>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ErrorMessage
+                </div>
+            }
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Matrix (one row per line)</label>
+                    <textarea class="form-control font-monospace" rows="10" @bind="MatrixText"></textarea>
+                    <small class="form-text text-muted">Cada fila debe tener la misma longitud. Máx 64x64.</small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Words to search (comma or newline separated)</label>
+                    <textarea class="form-control" rows="10" @bind="WordsText"></textarea>
+                    <div class="mt-2">
+                        <button class="btn btn-primary" @onclick="SearchWords">Search Words</button>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+            <h5>Results</h5>
+            @if (IsSearching)
+            {
+                <div class="text-muted">Buscando...</div>
+            }
+            else if (Results != null && Results.Any())
+            {
+                <ol class="list-group list-group-numbered">
+                    @foreach (var item in Results.Select((w, i) => new { Word = w, Index = i + 1 }))
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">@item.Index. @item.Word</div>
+                            </div>
+                        </li>
+                    }
+                </ol>
+            }
+            else
+            {
+                <div class="text-muted">No words found (or search not executed yet).</div>
+            }
+        </div>
+
+        <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+            <small>Demo to test WordFinder</small>
+            <div>
+                <a class="btn btn-outline-secondary btn-sm me-2" href="https://www.linkedin.com/in/santillanmatias/" target="_blank">My LinkedIn Profile</a>
+                <a class="btn btn-outline-secondary btn-sm" href="https://github.com/msantillan86/WordFinder" target="_blank">Project Repository on GitHub</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string MatrixText { get; set; } = DefaultMatrix;
+    private string WordsText { get; set; } = DefaultWords;
+    private string? ErrorMessage { get; set; }
+    private List<string>? Results { get; set; }
+    private bool IsSearching { get; set; }
+
+    private static readonly string DefaultMatrix = string.Join("\n", new[]
+    {
+        "SEARCHX",
+        "EASTERN",
+        "COMPILE",
+        "RUNTIME",
+        "CLUSTER",
+        "HISTORY",
+        "XORDERS"
+    });
+
+    private static readonly string DefaultWords = string.Join("\n", new[]
+    {
+        "SEARCH, EAST, RUNTIME, CLUSTER, HISTORY, ORDERS, TEST, MISSING, COMPILE, RUNT"
+    });
+
+    private void ClearError() => ErrorMessage = null;
+
+    private void SearchWords()
+    {
+        ClearError();
+        Results = null;
+        IsSearching = true;
+
+        try
+        {
+            var matrixRows = MatrixText
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim())
+                .Where(l => !string.IsNullOrEmpty(l));
+
+            var words = WordsText
+                .Split(new[] { '\r', '\n', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(w => w.Trim())
+                .Where(w => !string.IsNullOrEmpty(w));
+
+            // Construcción de WordFinder puede lanzar ArgumentException si la matriz es inválida
+            WordFinder finder = new WordFinder(matrixRows);
+
+            var found = finder.Find(words);
+            Results = found?.ToList() ?? new List<string>();
+        }
+        catch (ArgumentException aex)
+        {
+            ErrorMessage = aex.Message;
+            Results = null;
+        }
+        catch (Exception ex)
+        {
+            // Errores inesperados: no romper la UI
+            ErrorMessage = "Se produjo un error inesperado: " + ex.Message;
+            Results = null;
+        }
+        finally
+        {
+            IsSearching = false;
+            StateHasChanged();
+        }
+    }
+}

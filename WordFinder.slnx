@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="WordFinder.Application/WordFinder.Application.csproj" />
   <Project Path="WordFinder.Benchmarks/WordFinder.Benchmarks.csproj" />
+  <Project Path="WordFinder.Web/WordFinder.Web.csproj" />
 </Solution>
